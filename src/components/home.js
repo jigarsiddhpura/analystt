@@ -11,7 +11,6 @@ import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import { borderRadius } from "@mui/system";
 
-
 const PaginatedItems = ({ itemsPerPage }) => {
   const [data, setData] = useState([]);
 
@@ -34,20 +33,20 @@ const PaginatedItems = ({ itemsPerPage }) => {
   const [itemOffset, setItemOffset] = useState(0);
 
   const endOffset = itemOffset + itemsPerPage;
-  console.log(`Loading items from ${itemOffset} to ${endOffset}`);
-  const currentItems = (items.slice(itemOffset, endOffset));
-  console.log("ci: ",currentItems);
-  const pageCount = (Math.ceil(items.length / itemsPerPage));
+  // console.log(`Loading items from ${itemOffset} to ${endOffset}`);
+  const currentItems = items.slice(itemOffset, endOffset);
+  // console.log("ci: ", currentItems);
+  const pageCount = Math.ceil(items.length / itemsPerPage);
 
   // Invoke when user click to request another page.
   const handlePageClick = (event) => {
     const newOffset = (event.selected * itemsPerPage) % items.length;
-    console.log(
-      `User requested page number ${event.selected}, which is offset ${newOffset}`
-    );
+    // console.log(
+    //   `User requested page number ${event.selected}, which is offset ${newOffset}`
+    // );
     setItemOffset(newOffset);
-    const currentItems = (items.slice(itemOffset, endOffset));
-    console.log("ci: ",currentItems);
+    const currentItems = items.slice(itemOffset, endOffset);
+    // console.log("ci: ", currentItems);
   };
 
   const Item = styled(Paper)(({ theme }) => ({
@@ -63,14 +62,31 @@ const PaginatedItems = ({ itemsPerPage }) => {
     color: "white",
     borderRadius: "1.5rem",
     p: "10px",
-    "&:hover": { backgroundColor: "white", color: "red" , border:"2px solid red"},
+    "&:hover": {
+      backgroundColor: "white",
+      color: "red",
+      border: "2px solid red",
+    },
   });
 
-  const RenderData =  () => {
-    const details =   data.map((detail) =>
+  const [showDetails, setShowDetails] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const handleDetails = (id) => {
+    setShowDetails(!showDetails);
+    if(showDetails){
+      setSelected([...new Set(selected.concat([id]))]);
+    }
+    else{
+      setSelected(selected.filter(e => e !== id));
+    }
+    console.log(selected);
+  }
+
+  const RenderData = () => {
+    const details = data.map((detail) =>
       currentItems.includes(detail.id) ? (
         <span key={detail.id}>
-          <Paper elevation={3} sx={{ mb: "1rem" }}>
+          <Paper elevation={2} sx={{ mb: "1rem", pb: "4px" }}>
             <Grid
               container
               style={{
@@ -89,7 +105,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
                 <b>
                   <p>CONTACT</p>
                 </b>
-                {detail.phone}
+                {detail.name}
               </Grid>
               <Grid item xs={2.4}>
                 <b>
@@ -104,20 +120,89 @@ const PaginatedItems = ({ itemsPerPage }) => {
                 Mumbai-{detail.id}
               </Grid>
               <Grid item xs={2.4}>
-                <ShowButton>Show details</ShowButton>
+                {
+                selected.includes(detail.id) ? (
+                  <ShowButton
+                  id={detail.id}
+                  onClick={(e) => handleDetails(e.currentTarget.id)}>Hide details</ShowButton>
+                ) : (
+                  <ShowButton
+                  id={detail.id}
+                  onClick={(e) => handleDetails(e.currentTarget.id)}>Show details</ShowButton>
+                )}
               </Grid>
             </Grid>
+            <Paper
+              elevation={3}
+              style={{
+                marginBottom: "1rem",
+                width: "94%",
+                position: "relative",
+                left: "3%",
+                display: showDetails ? "block" : "none",
+              }}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <b>
+                    <p>Description</p>
+                  </b>
+                  <span>
+                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                    Similique perspiciatis accusantium ex, debitis enim porro
+                    reiciendis impedit voluptas consequuntur dignissimos!
+                  </span>
+                </Grid>
+                <Grid item xs={4}>
+                  <b>
+                    <p>Contact Person</p>
+                  </b>
+                  <p>{detail.name}</p>
+                  <b>
+                    <p>Designation</p>
+                  </b>
+                  <p>__________</p>
+                  <b>
+                    <p>Email</p>
+                  </b>
+                  <p>{detail.email}</p>
+                  <b>
+                    <p>Phones</p>
+                  </b>
+                  <p>{detail.phone}</p>
+                </Grid>
+                <Grid item xs={6}>
+                  <b>
+                    <p>Address</p>
+                  </b>
+                  <p>
+                    {detail.address.street}, {detail.address.suite},{" "}
+                    {detail.address.city}, {detail.address.zipcode}
+                  </p>
+                  <b>
+                    <p>City</p>
+                  </b>
+                  <p>{detail.address.city}</p>
+                  <b>
+                    <p>State</p>
+                  </b>
+                  <p>__________</p>
+                  <b>
+                    <p>Country</p>
+                  </b>
+                  <p>__________</p>
+                </Grid>
+              </Grid>
+            </Paper>
           </Paper>
         </span>
       ) : null
     );
     return <> {details} </>;
-  }
-
+  };
 
   return (
     <>
-
       <RenderData />
 
       <Stack spacing={2}>
@@ -143,7 +228,6 @@ const PaginatedItems = ({ itemsPerPage }) => {
           renderOnZeroPageCount={null}
         />
       </Stack>
-
     </>
   );
 };
