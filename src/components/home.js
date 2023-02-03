@@ -47,6 +47,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
     setItemOffset(newOffset);
     const currentItems = items.slice(itemOffset, endOffset);
     // console.log("ci: ", currentItems);
+    setPage(event.selected);
   };
 
   const Item = styled(Paper)(({ theme }) => ({
@@ -69,21 +70,20 @@ const PaginatedItems = ({ itemsPerPage }) => {
     },
   });
 
-  const [showDetails, setShowDetails] = useState(false);
-  const [selected, setSelected] = useState([]);
-  const handleDetails = (id) => {
-    setShowDetails(!showDetails);
-    if(showDetails){
-      setSelected([...new Set(selected.concat([id]))]);
-    }
-    else{
-      setSelected(selected.filter(e => e !== id));
-    }
-    console.log(selected);
+
+  const [likeStates, setLikeStates] = useState(Array(10).fill(false));
+
+  const handleLikeClick = (id) => {
+    setLikeStates(prevLikeStates => {
+      const newLikeStates = [...prevLikeStates];
+      newLikeStates[id] = !newLikeStates[id];
+      console.log(newLikeStates);
+      return newLikeStates;
+    });
   }
 
   const RenderData = () => {
-    const details = data.map((detail) =>
+    const details = data.map((detail,index) =>
       currentItems.includes(detail.id) ? (
         <span key={detail.id}>
           <Paper elevation={2} sx={{ mb: "1rem", pb: "4px" }}>
@@ -120,16 +120,13 @@ const PaginatedItems = ({ itemsPerPage }) => {
                 Mumbai-{detail.id}
               </Grid>
               <Grid item xs={2.4}>
-                {
-                selected.includes(detail.id) ? (
-                  <ShowButton
-                  id={detail.id}
-                  onClick={(e) => handleDetails(e.currentTarget.id)}>Hide details</ShowButton>
-                ) : (
-                  <ShowButton
-                  id={detail.id}
-                  onClick={(e) => handleDetails(e.currentTarget.id)}>Show details</ShowButton>
-                )}
+                <ShowButton
+                className={likeStates[index] ? 'clicked' : 'not-clicked'}
+                onClick={() => {
+                handleLikeClick(index);
+                }}>
+                {likeStates[index] ? 'HIDE DETAILS' : 'SHOW DETAILS'}
+                </ShowButton>
               </Grid>
             </Grid>
             <Paper
@@ -139,7 +136,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
                 width: "94%",
                 position: "relative",
                 left: "3%",
-                display: showDetails ? "block" : "none",
+                display: likeStates[index] ? "block" : "none",
               }}
             >
               <Grid container spacing={2}>
@@ -201,6 +198,9 @@ const PaginatedItems = ({ itemsPerPage }) => {
     return <> {details} </>;
   };
 
+  const [page, setPage] = React.useState(0);
+
+
   return (
     <>
       <RenderData />
@@ -227,6 +227,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
           activeClassName={"active"}
           renderOnZeroPageCount={null}
         />
+        <Pagination count={pageCount} color="secondary" page={page+1} onChange={handlePageClick} />
       </Stack>
     </>
   );
