@@ -6,10 +6,27 @@ import axios from "axios";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Unstable_Grid2";
 import { styled } from "@mui/material/styles";
-import Button from "@mui/material/Button";
 import "../App.css";
+import Button from "@mui/material/Button";
 
 const PaginatedItems = ({ itemsPerPage }) => {
+  // adding event listener for responsiveness
+  const [width, setWindowWidth] = useState(0);
+
+  useEffect(() => {
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
+
+  const updateDimensions = () => {
+    const width = window.innerWidth;
+    setWindowWidth(width);
+  };
+
+  const response = { responsive: width < 670 };
+  const resp = response.responsive;
+  //
 
   // GET request
 
@@ -33,7 +50,8 @@ const PaginatedItems = ({ itemsPerPage }) => {
   const ShowButton = styled(Button)({
     backgroundColor: "red",
     color: "white",
-    borderRadius: "1.5rem",
+    borderRadius: resp ? "1rem" : "1.5rem",
+    fontSize: resp ? '0.8rem': '1rem',
     p: "10px",
     "&:hover": {
       backgroundColor: "white",
@@ -67,14 +85,13 @@ const PaginatedItems = ({ itemsPerPage }) => {
 
   // show details functionality start
 
-  const [likeStates, setLikeStates] = useState(Array(10).fill(false));
+  const [detailStates, setDetailStates] = useState(Array(10).fill(false));
 
-  const handleLikeClick = (id) => {
-    setLikeStates(prevLikeStates => {
-      const newLikeStates = [...prevLikeStates];
-      newLikeStates[id] = !newLikeStates[id];
-      console.log(newLikeStates);
-      return newLikeStates;
+  const handleclick = (id) => {
+    setDetailStates(prevDetailStates => {
+      const newDetailStates = [...prevDetailStates];
+      newDetailStates[id] = !newDetailStates[id];
+      return newDetailStates;
     });
   }
 
@@ -117,11 +134,11 @@ const PaginatedItems = ({ itemsPerPage }) => {
               </Grid>
               <Grid item xs={2.4}>
                 <ShowButton
-                className={likeStates[index] ? 'clicked' : 'not-clicked'}
+                className={detailStates[index] ? 'clicked' : 'not-clicked'}
                 onClick={() => {
-                handleLikeClick(index);
+                handleclick(index);
                 }}>
-                {likeStates[index] ? 'HIDE DETAILS' : 'SHOW DETAILS'}
+                {detailStates[index] ? 'HIDE DETAILS' : 'SHOW DETAILS'}
                 </ShowButton>
               </Grid>
             </Grid>
@@ -132,11 +149,11 @@ const PaginatedItems = ({ itemsPerPage }) => {
                 width: "94%",
                 position: "relative",
                 left: "3%",
-                display: likeStates[index] ? "block" : "none",
+                display: detailStates[index] ? "block" : "none",
               }}
             >
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={12}  style={{border:'2px solid black', display:'flex', justifyContent:'flex-start'}}>
                   <b>
                     <p>Description</p>
                   </b>
@@ -146,7 +163,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
                     reiciendis impedit voluptas consequuntur dignissimos!
                   </span>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={4}  style={{border:'2px solid black'}}>
                   <b>
                     <p>Contact Person</p>
                   </b>
@@ -164,7 +181,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
                   </b>
                   <p>{detail.phone}</p>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={6}  style={{border:'2px solid black'}}>
                   <b>
                     <p>Address</p>
                   </b>
@@ -199,7 +216,7 @@ const PaginatedItems = ({ itemsPerPage }) => {
       <RenderData />
 
       <Stack spacing={2}>
-        <Pagination className='pagination'  count={pageCount} color="error" page={page} onChange={handleChange} />
+        <Pagination className='pagination' shape='rounded' count={pageCount} color="error" page={page} onChange={handleChange} />
       </Stack>
     </>
   );
