@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import ReactPaginate from "react-paginate";
-import "../App.css";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
@@ -9,9 +7,12 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Unstable_Grid2";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import { borderRadius } from "@mui/system";
+import "../App.css";
 
 const PaginatedItems = ({ itemsPerPage }) => {
+
+  // GET request
+
   const [data, setData] = useState([]);
 
   const sendGetRequest = async () => {
@@ -28,35 +29,6 @@ const PaginatedItems = ({ itemsPerPage }) => {
     sendGetRequest();
   }, []);
 
-  const items = Array.from({ length: data.length }, (_, index) => index + 1);
-
-  const [itemOffset, setItemOffset] = useState(0);
-
-  const endOffset = itemOffset + itemsPerPage;
-  // console.log(`Loading items from ${itemOffset} to ${endOffset}`);
-  const currentItems = items.slice(itemOffset, endOffset);
-  // console.log("ci: ", currentItems);
-  const pageCount = Math.ceil(items.length / itemsPerPage);
-
-  // Invoke when user click to request another page.
-  const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % items.length;
-    // console.log(
-    //   `User requested page number ${event.selected}, which is offset ${newOffset}`
-    // );
-    setItemOffset(newOffset);
-    const currentItems = items.slice(itemOffset, endOffset);
-    // console.log("ci: ", currentItems);
-    setPage(event.selected);
-  };
-
-  const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: "center",
-    color: theme.palette.text.secondary,
-  }));
 
   const ShowButton = styled(Button)({
     backgroundColor: "red",
@@ -70,6 +42,30 @@ const PaginatedItems = ({ itemsPerPage }) => {
     },
   });
 
+  // implemented pagination functionality
+
+  const items = Array.from({ length: data.length }, (_, index) => index + 1);
+
+  const [itemOffset, setItemOffset] = useState(0);
+
+  const endOffset = itemOffset + itemsPerPage;
+
+  const currentItems = items.slice(itemOffset, endOffset);
+  const pageCount = Math.ceil(items.length / itemsPerPage);
+
+  const [page, setPage] = useState(1);
+
+    // Invoke when user click to request another page.
+    const handleChange = (event, page) => {
+      const index = page-1;
+      const newOffset = (index * itemsPerPage) % items.length;
+      setItemOffset(newOffset);
+      const currentItems = items.slice(itemOffset, endOffset);
+      setPage(page);
+    }
+
+
+  // show details functionality start
 
   const [likeStates, setLikeStates] = useState(Array(10).fill(false));
 
@@ -196,38 +192,14 @@ const PaginatedItems = ({ itemsPerPage }) => {
       ) : null
     );
     return <> {details} </>;
-  };
-
-  const [page, setPage] = React.useState(0);
-
+  }; 
 
   return (
     <>
       <RenderData />
 
       <Stack spacing={2}>
-        <ReactPaginate
-          nextLabel="next >"
-          onPageChange={handlePageClick}
-          pageRangeDisplayed={3}
-          marginPagesDisplayed={2}
-          pageCount={pageCount}
-          previousLabel="< previous"
-          pageClassName="page-item"
-          pageLinkClassName="page-link"
-          previousClassName="page-item"
-          previousLinkClassName="page-link"
-          nextClassName="page-item"
-          nextLinkClassName="page-link"
-          breakLabel="..."
-          breakClassName="page-item"
-          breakLinkClassName="page-link"
-          containerClassName={"pagination"}
-          subContainerClassName={"pages pagination"}
-          activeClassName={"active"}
-          renderOnZeroPageCount={null}
-        />
-        <Pagination count={pageCount} color="secondary" page={page+1} onChange={handlePageClick} />
+        <Pagination className='pagination'  count={pageCount} color="error" page={page} onChange={handleChange} />
       </Stack>
     </>
   );
